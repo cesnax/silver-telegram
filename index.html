@@ -1,0 +1,1531 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MatchLab Fußball</title>
+    <link rel="stylesheet" href="styles.css?v=availability" />
+  </head>
+  <body>
+    <div class="app-shell">
+      <aside class="sidebar" aria-label="Hauptnavigation">
+        <div class="brand">
+          <div class="brand-mark" aria-hidden="true">ML</div>
+          <div>
+            <strong>MatchLab</strong>
+            <span>Fußballanalyse</span>
+          </div>
+        </div>
+
+        <nav class="nav-list">
+          <button class="nav-item is-active" data-view="dashboard" type="button">
+            <span aria-hidden="true">▦</span>
+            Übersicht
+          </button>
+          <button class="nav-item" data-view="analysis" type="button">
+            <span aria-hidden="true">◎</span>
+            Spielerdaten erfassen
+          </button>
+          <button class="nav-item" data-view="compare" type="button">
+            <span aria-hidden="true">≋</span>
+            Vergleiche
+          </button>
+          <button class="nav-item" data-view="season" type="button">
+            <span aria-hidden="true">▤</span>
+            Saisonstatistik
+          </button>
+          <button class="nav-item" data-view="analyst" type="button">
+            <span aria-hidden="true">◈</span>
+            Analyst
+          </button>
+          <button class="nav-item" data-view="calendar" type="button">
+            <span aria-hidden="true">▣</span>
+            Kalender
+          </button>
+          <button class="nav-item" data-view="training" type="button">
+            <span aria-hidden="true">◇</span>
+            Training
+          </button>
+          <button class="nav-item" data-view="trainingStats" type="button">
+            <span aria-hidden="true">▧</span>
+            Trainingsstatistik
+          </button>
+          <button class="nav-item" data-view="leaderboard" type="button">
+            <span aria-hidden="true">≡</span>
+            Bestenliste
+          </button>
+          <button class="nav-item" data-view="injuries" type="button">
+            <span aria-hidden="true">✚</span>
+            Verletzungen
+          </button>
+          <button class="nav-item" data-view="availability" type="button">
+            <span aria-hidden="true">◷</span>
+            Verfügbarkeiten
+          </button>
+          <button class="nav-item" data-view="players" type="button">
+            <span aria-hidden="true">◌</span>
+            Spieler
+          </button>
+          <button class="nav-item" data-view="matches" type="button">
+            <span aria-hidden="true">□</span>
+            Spiele
+          </button>
+        </nav>
+
+        <div class="sidebar-panel">
+          <span class="eyebrow">Saison</span>
+          <strong>2025 / 26</strong>
+          <p>Lokale Arbeitsversion für Spielerdaten, Spielauswertung und Saisonvergleich.</p>
+        </div>
+      </aside>
+
+      <main class="workspace">
+        <header class="topbar">
+          <div>
+            <span class="eyebrow">Teamstatistik</span>
+            <h1 id="viewTitle">Übersicht</h1>
+          </div>
+          <div class="topbar-actions">
+            <button class="ghost-button" id="resetDemoButton" type="button">Beispieldaten laden</button>
+            <button class="primary-button" data-jump="analysis" type="button">Neue Analyse</button>
+          </div>
+        </header>
+
+        <section class="view is-visible" id="dashboardView" data-title="Übersicht">
+          <section class="dashboard-calendar-strip" id="dashboardCalendarSummary"></section>
+          <section class="assistant-panel" id="dashboardAssistant"></section>
+          <div class="metric-grid" id="dashboardMetrics"></div>
+
+          <div class="dashboard-grid">
+            <section class="panel panel-large">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Form</span>
+                  <h2>Team-Formkurve</h2>
+                </div>
+                <select id="teamMetricSelect" aria-label="Teamkurve auswählen">
+                  <option value="index">Leistungsindex</option>
+                  <option value="passAccuracy">Passquote</option>
+                  <option value="rating">Trainerbewertung</option>
+                </select>
+              </div>
+              <div class="chart-box" id="teamFormChart"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Ranking</span>
+                  <h2>Top-Spieler</h2>
+                </div>
+              </div>
+              <div class="chart-box compact" id="topPlayersChart"></div>
+            </section>
+          </div>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">Spiele</span>
+                <h2>Letzte Auswertungen</h2>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Datum</th>
+                    <th>Gegner</th>
+                    <th>Ergebnis</th>
+                    <th>Passquote</th>
+                    <th>Top-Notiz</th>
+                  </tr>
+                </thead>
+                <tbody id="recentMatchesTable"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="analysisView" data-title="Spielerdaten erfassen">
+          <div class="analysis-layout">
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Eingabe</span>
+                  <h2>Spielerwerte erfassen</h2>
+                </div>
+              </div>
+
+              <form id="statForm" class="stat-form">
+                <div class="filter-bar compact-filter">
+                  <label>
+                    Ort
+                    <select id="analysisVenueFilter">
+                      <option value="all">Alle Spiele</option>
+                      <option value="Heim">Heimspiele</option>
+                      <option value="Auswärts">Auswärtsspiele</option>
+                    </select>
+                  </label>
+                  <label>
+                    Wettbewerb
+                    <select id="analysisCompetitionFilter">
+                      <option value="all">Alle Wettbewerbe</option>
+                      <option value="Liga">Liga</option>
+                      <option value="Pokal">Pokal</option>
+                      <option value="Freundschaftsspiel">Freundschaftsspiel</option>
+                      <option value="Interner Test">Interner Test</option>
+                    </select>
+                  </label>
+                </div>
+                <label>
+                  Spiel
+                  <select id="statMatch"></select>
+                </label>
+                <label>
+                  Spieler
+                  <select id="statPlayer"></select>
+                </label>
+
+                <div class="stat-grid">
+                  <label>
+                    <button class="stat-label-button" data-leaderboard="minutes" type="button">Minuten</button>
+                    <input id="minutes" min="0" max="130" name="minutes" type="number" />
+                  </label>
+                  <label>
+                    <button class="stat-label-button" data-leaderboard="passesCompleted" type="button">Pässe angekommen</button>
+                    <input id="passesCompleted" min="0" name="passesCompleted" type="number" />
+                  </label>
+                  <label>
+                    <button class="stat-label-button" data-leaderboard="passesAttempted" type="button">Pässe gesamt</button>
+                    <input id="passesAttempted" min="0" name="passesAttempted" type="number" />
+                  </label>
+                  <label>
+                    <button class="stat-label-button" data-leaderboard="goals" type="button">Tore</button>
+                    <input id="goals" min="0" name="goals" type="number" readonly placeholder="aus Spieltag" />
+                  </label>
+                  <label>
+                    <button class="stat-label-button" data-leaderboard="assists" type="button">Assists</button>
+                    <input id="assists" min="0" name="assists" type="number" readonly placeholder="aus Spieltag" />
+                  </label>
+                  <label>
+                    <button class="stat-label-button" data-leaderboard="shots" type="button">Abschlüsse</button>
+                    <input id="shots" min="0" name="shots" type="number" />
+                  </label>
+                  <label>
+                    <button class="stat-label-button" data-leaderboard="dribblesCompleted" type="button">Dribblings erfolgreich</button>
+                    <input id="dribblesCompleted" min="0" name="dribblesCompleted" type="number" />
+                  </label>
+                  <label>
+                    <button class="stat-label-button" data-leaderboard="dribblesAttempted" type="button">Dribblings gesamt</button>
+                    <input id="dribblesAttempted" min="0" name="dribblesAttempted" type="number" />
+                  </label>
+                  <label>
+                    <button class="stat-label-button" data-leaderboard="crossesCompleted" type="button">Flanken angekommen</button>
+                    <input id="crossesCompleted" min="0" name="crossesCompleted" type="number" />
+                  </label>
+                  <label>
+                    <button class="stat-label-button" data-leaderboard="crossesAttempted" type="button">Flanken gesamt</button>
+                    <input id="crossesAttempted" min="0" name="crossesAttempted" type="number" />
+                  </label>
+                  <label>
+                    <button class="stat-label-button" data-leaderboard="tacklesWon" type="button">Tacklings gewonnen</button>
+                    <input id="tacklesWon" min="0" name="tacklesWon" type="number" />
+                  </label>
+                  <label>
+                    <button class="stat-label-button" data-leaderboard="duelsWon" type="button">Zweikämpfe gewonnen</button>
+                    <input id="duelsWon" min="0" name="duelsWon" type="number" />
+                  </label>
+                  <label>
+                    <button class="stat-label-button" data-leaderboard="interceptions" type="button">Balleroberungen</button>
+                    <input id="interceptions" min="0" name="interceptions" type="number" />
+                  </label>
+                  <label>
+                    <button class="stat-label-button" data-leaderboard="ballLosses" type="button">Ballverluste</button>
+                    <input id="ballLosses" min="0" name="ballLosses" type="number" />
+                  </label>
+                  <label>
+                    <button class="stat-label-button" data-leaderboard="rating" type="button">Bewertung 1-10</button>
+                    <input id="rating" max="10" min="1" name="rating" step="0.1" type="number" />
+                  </label>
+                </div>
+
+                <section class="position-stat-section">
+                  <span class="eyebrow">Positionsspezifische Werte</span>
+                  <div class="stat-grid">
+                    <label>
+                      Paraden
+                      <input id="saves" min="0" name="saves" type="number" />
+                    </label>
+                    <label>
+                      Schüsse aufs Tor Gegner
+                      <input id="shotsOnTargetAgainst" min="0" name="shotsOnTargetAgainst" type="number" />
+                    </label>
+                    <label>
+                      Gehaltene Elfmeter
+                      <input id="penaltiesSaved" min="0" name="penaltiesSaved" type="number" />
+                    </label>
+                    <label>
+                      Elfmeter gegen
+                      <input id="penaltiesFaced" min="0" name="penaltiesFaced" type="number" />
+                    </label>
+                    <label>
+                      Geklärte Bälle
+                      <input id="clearances" min="0" name="clearances" type="number" />
+                    </label>
+                    <label>
+                      Kopfballduelle gewonnen
+                      <input id="aerialDuelsWon" min="0" name="aerialDuelsWon" type="number" />
+                    </label>
+                    <label>
+                      Tacklings versucht
+                      <input id="tacklesAttempted" min="0" name="tacklesAttempted" type="number" />
+                    </label>
+                    <label>
+                      Zweikämpfe versucht
+                      <input id="duelsAttempted" min="0" name="duelsAttempted" type="number" />
+                    </label>
+                    <label>
+                      Begangene Fouls
+                      <input id="foulsCommittedPlayer" min="0" name="foulsCommittedPlayer" type="number" />
+                    </label>
+                    <label>
+                      Geblockte Schüsse
+                      <input id="blockedShots" min="0" name="blockedShots" type="number" />
+                    </label>
+                    <label>
+                      Progressive Pässe
+                      <input id="progressivePasses" min="0" name="progressivePasses" type="number" />
+                    </label>
+                    <label>
+                      xA aus dem Spiel
+                      <input id="xAOpenPlay" min="0" name="xAOpenPlay" step="0.1" type="number" />
+                    </label>
+                    <label>
+                      xG ohne Elfmeter
+                      <input id="nonPenaltyXgStat" min="0" name="nonPenaltyXgStat" step="0.1" type="number" />
+                    </label>
+                    <label>
+                      Entscheidende Pässe
+                      <input id="keyPasses" min="0" name="keyPasses" type="number" />
+                    </label>
+                  </div>
+                </section>
+
+                <label>
+                  Analyse-Notiz
+                  <textarea id="note" name="note" rows="5" placeholder="z. B. stark im Gegenpressing, gute diagonale Verlagerungen, nach Minute 60 weniger klare Aktionen"></textarea>
+                </label>
+
+                <div class="form-actions">
+                  <button class="primary-button" type="submit">Speichern</button>
+                  <button class="ghost-button" id="clearStatButton" type="button">Leeren</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Spielauswertung</span>
+                  <h2 id="analysisMatchTitle">Aktuelles Spiel</h2>
+                </div>
+              </div>
+              <div class="chart-box compact" id="matchPassChart"></div>
+              <div class="table-wrap slim">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Spieler</th>
+                      <th>Passquote</th>
+                      <th>Drib.</th>
+                      <th>Flanken</th>
+                      <th>Index</th>
+                      <th>Notiz</th>
+                    </tr>
+                  </thead>
+                  <tbody id="matchStatsTable"></tbody>
+                </table>
+              </div>
+              <div class="leaderboard-block">
+                <div class="leaderboard-heading">
+                  <div>
+                    <span class="eyebrow">Bestenliste</span>
+                    <h2 id="statLeaderboardTitle">Passquote</h2>
+                  </div>
+                  <span id="statLeaderboardHint">Saison</span>
+                </div>
+                <div class="leaderboard-tabs" id="leaderboardMetricTabs"></div>
+                <div class="leaderboard-list" id="statLeaderboard"></div>
+              </div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="compareView" data-title="Vergleiche">
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">Auswahl</span>
+                <h2>Spieler vergleichen</h2>
+              </div>
+              <select id="comparisonMetric" aria-label="Vergleichswert">
+                <option value="index">Leistungsindex</option>
+                <option value="passAccuracy">Passquote</option>
+                <option value="dribbleSuccess">Dribblingquote</option>
+                <option value="crossAccuracy">Flankenquote</option>
+                <option value="rating">Trainerbewertung</option>
+                <option value="goalsAssists">Tore + Assists</option>
+              </select>
+            </div>
+            <div class="player-picker" id="comparisonPicker"></div>
+          </section>
+
+          <div class="compare-grid">
+            <section class="panel panel-large">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Formkurven</span>
+                  <h2>Verlauf je Spiel</h2>
+                </div>
+              </div>
+              <div class="chart-box" id="comparisonLineChart"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Profil</span>
+                  <h2>Stärkenvergleich</h2>
+                </div>
+              </div>
+              <div class="chart-box" id="radarChart"></div>
+            </section>
+          </div>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">Saison</span>
+                <h2>Vergleichstabelle</h2>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Spieler</th>
+                    <th>Spiele</th>
+                    <th>Passquote</th>
+                    <th>Tore</th>
+                    <th>Assists</th>
+                    <th>Ø Index</th>
+                    <th>Ø Bewertung</th>
+                  </tr>
+                </thead>
+                <tbody id="comparisonTable"></tbody>
+              </table>
+            </div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">Video-Notizen</span>
+                <h2>Beobachtungen der Auswahl</h2>
+              </div>
+            </div>
+            <div class="notes-grid" id="notesTimeline"></div>
+          </section>
+        </section>
+
+        <section class="view" id="seasonView" data-title="Saisonstatistik">
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">Filter</span>
+                <h2>Saison auswerten</h2>
+              </div>
+              <div class="season-actions">
+                <div class="view-tabs" id="seasonModeTabs" aria-label="Saisonansicht">
+                  <button class="view-tab is-active" data-season-mode="overview" type="button">Übersicht</button>
+                  <button class="view-tab" data-season-mode="details" type="button">Detaillierte Analyse</button>
+                </div>
+                <select id="seasonMetricSelect" aria-label="Saisonstatistik auswählen"></select>
+              </div>
+            </div>
+            <div class="filter-bar">
+              <label>
+                Zeitraum
+                <select id="seasonPeriodFilter">
+                  <option value="all">Gesamte Saison</option>
+                  <option value="last3">Letzte 3 Spiele</option>
+                  <option value="last5">Letzte 5 Spiele</option>
+                  <option value="last30">Letzte 30 Tage</option>
+                  <option value="firstHalf">Hinrunde</option>
+                  <option value="secondHalf">Rückrunde</option>
+                  <option value="custom">Datumsbereich</option>
+                </select>
+              </label>
+              <label>
+                Ort
+                <select id="seasonVenueFilter">
+                  <option value="all">Alle Spiele</option>
+                  <option value="Heim">Heimspiele</option>
+                  <option value="Auswärts">Auswärtsspiele</option>
+                </select>
+              </label>
+              <label>
+                Wettbewerb
+                <select id="seasonCompetitionFilter">
+                  <option value="all">Alle Wettbewerbe</option>
+                  <option value="Liga">Liga</option>
+                  <option value="Pokal">Pokal</option>
+                  <option value="Freundschaftsspiel">Freundschaftsspiel</option>
+                  <option value="Interner Test">Interner Test</option>
+                </select>
+              </label>
+              <label>
+                Von
+                <input id="seasonDateFromFilter" type="date" />
+              </label>
+              <label>
+                Bis
+                <input id="seasonDateToFilter" type="date" />
+              </label>
+            </div>
+          </section>
+
+          <div id="seasonOverviewContent">
+            <div class="metric-grid" id="seasonSummaryMetrics"></div>
+
+            <section class="panel season-goal-panel">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Torstatistik</span>
+                  <h2>Detaillierte Torauswertung</h2>
+                </div>
+              </div>
+              <div class="season-goal-metrics" id="seasonGoalMetrics"></div>
+              <div class="season-goal-layout">
+                <div class="chart-box compact" id="seasonGoalTypeChart"></div>
+                <div class="chart-box compact" id="seasonGoalTimingChart"></div>
+                <div class="season-goal-rankings" id="seasonGoalRankings"></div>
+              </div>
+              <div class="season-goal-timeline" id="seasonGoalTimeline"></div>
+            </section>
+
+            <div class="dashboard-grid">
+              <section class="panel panel-large">
+                <div class="panel-heading">
+                  <div>
+                    <span class="eyebrow">Formkurve</span>
+                    <h2 id="seasonFormTitle">Teamverlauf</h2>
+                  </div>
+                </div>
+                <div class="chart-box" id="seasonFormChart"></div>
+              </section>
+
+              <section class="panel">
+                <div class="panel-heading">
+                  <div>
+                    <span class="eyebrow">Bestenliste</span>
+                    <h2 id="seasonLeaderboardTitle">Top-Spieler</h2>
+                  </div>
+                </div>
+                <div class="leaderboard-list" id="seasonLeaderboard"></div>
+              </section>
+            </div>
+
+            <div class="dashboard-grid">
+              <section class="panel">
+                <div class="panel-heading">
+                  <div>
+                    <span class="eyebrow">Mannschaft</span>
+                    <h2>Teamübersicht</h2>
+                  </div>
+                </div>
+                <div class="season-team-grid" id="seasonTeamOverview"></div>
+              </section>
+
+              <section class="panel panel-large">
+                <div class="panel-heading">
+                  <div>
+                    <span class="eyebrow">Einzelspieler</span>
+                    <h2>Spielerstatistik</h2>
+                  </div>
+                </div>
+                <div class="table-wrap">
+                  <table>
+                    <thead>
+                      <tr>
+                        <th>Spieler</th>
+                        <th>Spiele</th>
+                        <th>Min.</th>
+                        <th>Passquote</th>
+                        <th>Drib.</th>
+                        <th>Flanken</th>
+                        <th>Tore</th>
+                        <th>Assists</th>
+                        <th>Ø Index</th>
+                      </tr>
+                    </thead>
+                    <tbody id="seasonPlayerTable"></tbody>
+                  </table>
+                </div>
+              </section>
+            </div>
+          </div>
+
+          <div class="season-detail-content" id="seasonDetailedContent">
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Detaillierte Analyse</span>
+                  <h2>Teamprofil nach Leistungsbereichen</h2>
+                </div>
+              </div>
+              <div class="season-radar-grid" id="seasonRadarGrid"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="analystView" data-title="Analyst">
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">Analyst</span>
+                <h2>Auswertung vorbereiten</h2>
+              </div>
+            </div>
+            <div class="filter-bar analyst-filter-bar">
+              <label>
+                Spielerfokus
+                <select id="analystPlayerSelect"></select>
+              </label>
+              <label>
+                Ort
+                <select id="analystVenueFilter">
+                  <option value="all">Alle Spiele</option>
+                  <option value="Heim">Heimspiele</option>
+                  <option value="Auswärts">Auswärtsspiele</option>
+                </select>
+              </label>
+              <label>
+                Wettbewerb
+                <select id="analystCompetitionFilter">
+                  <option value="all">Alle Wettbewerbe</option>
+                  <option value="Liga">Liga</option>
+                  <option value="Pokal">Pokal</option>
+                  <option value="Freundschaftsspiel">Freundschaftsspiel</option>
+                  <option value="Interner Test">Interner Test</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <div class="metric-grid" id="analystMetrics"></div>
+
+          <div class="dashboard-grid">
+            <section class="panel panel-large">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Mannschaft</span>
+                  <h2>Analystenurteil</h2>
+                </div>
+              </div>
+              <div class="analyst-report" id="teamAnalystReport"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Einzelspieler</span>
+                  <h2 id="playerAnalystTitle">Spielerprofil</h2>
+                </div>
+              </div>
+              <div class="analyst-report" id="playerAnalystReport"></div>
+            </section>
+          </div>
+
+          <div class="dashboard-grid">
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Training</span>
+                  <h2>Konkrete Empfehlungen</h2>
+                </div>
+              </div>
+              <div class="analyst-list" id="analystRecommendations"></div>
+            </section>
+
+            <section class="panel panel-large">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Spielerdaten</span>
+                  <h2>Nächste Beobachtungsaufträge</h2>
+                </div>
+              </div>
+              <div class="analyst-list" id="analystAssignments"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="calendarView" data-title="Kalender">
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">Saisonkalender</span>
+                <h2 id="calendarMonthTitle">Kalender</h2>
+              </div>
+              <div class="calendar-actions">
+                <button class="ghost-button icon-button" id="calendarPrevMonth" type="button" aria-label="Vorheriger Monat">‹</button>
+                <button class="ghost-button" id="calendarTodayButton" type="button">Heute</button>
+                <button class="ghost-button icon-button" id="calendarNextMonth" type="button" aria-label="Nächster Monat">›</button>
+                <div class="view-tabs" id="calendarViewTabs" aria-label="Kalenderansicht">
+                  <button class="view-tab is-active" data-calendar-view="month" type="button">Kalender</button>
+                  <button class="view-tab" data-calendar-view="list" type="button">Liste</button>
+                </div>
+              </div>
+            </div>
+            <div class="filter-bar calendar-filter-bar">
+              <label>
+                Terminstatus
+                <select id="calendarTimelineFilter">
+                  <option value="upcoming">Anstehende Termine</option>
+                  <option value="past">Vergangene Termine</option>
+                </select>
+              </label>
+            </div>
+          </section>
+
+          <section class="panel calendar-overview-panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">Übersicht</span>
+                <h2 id="calendarTimelineTitle">Nächste 5 Termine</h2>
+              </div>
+            </div>
+            <div class="calendar-list calendar-overview-list" id="calendarOverviewList"></div>
+          </section>
+
+          <div class="calendar-layout">
+            <section class="panel panel-large" id="calendarMonthPane">
+              <div class="calendar-grid" id="calendarGrid"></div>
+            </section>
+
+            <section class="panel" id="calendarFormPanel">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Termin</span>
+                  <h2>Termin erstellen</h2>
+                </div>
+              </div>
+              <form id="calendarEventForm" class="stack-form">
+                <label>
+                  Terminart
+                  <select id="calendarCreateType"></select>
+                </label>
+                <label>
+                  Datum
+                  <input id="calendarDate" required type="date" />
+                </label>
+                <div class="score-row">
+                  <label>
+                    Beginn
+                    <input id="calendarStartTime" type="time" />
+                  </label>
+                  <label>
+                    Ende
+                    <input id="calendarEndTime" type="time" />
+                  </label>
+                </div>
+                <label class="calendar-training-field">
+                  Treffzeit
+                  <input id="calendarMeetTime" type="time" />
+                </label>
+                <label id="calendarTitleLabel">
+                  Titel
+                  <input id="calendarTitle" type="text" placeholder="z. B. Training Schwerpunkt Pressing" />
+                </label>
+                <label>
+                  Ort
+                  <input id="calendarLocation" type="text" placeholder="z. B. Hauptplatz, Kabine, Auswärts" />
+                </label>
+
+                <div class="calendar-type-fields calendar-training-fields">
+                  <label>
+                    Trainingsart
+                    <select id="calendarTrainingType"></select>
+                  </label>
+                  <div class="score-row">
+                    <label>
+                      Priorität
+                      <select id="calendarTrainingPriority"></select>
+                    </label>
+                    <label>
+                      Intensität
+                      <select id="calendarTrainingIntensity"></select>
+                    </label>
+                  </div>
+                  <label class="calendar-repeat-toggle">
+                    <input id="calendarTrainingRepeat" type="checkbox" />
+                    <span>Wöchentlichen Serientermin erstellen</span>
+                  </label>
+                  <label id="calendarRepeatUntilWrap" class="is-hidden">
+                    Wiederholen bis
+                    <input id="calendarRepeatUntil" type="date" />
+                  </label>
+                </div>
+
+                <div class="calendar-type-fields calendar-match-fields">
+                  <label>
+                    Gegner
+                    <input id="calendarMatchOpponent" type="text" placeholder="z. B. SV Nord" />
+                  </label>
+                  <div class="score-row">
+                    <label>
+                      Ort
+                      <select id="calendarMatchVenue">
+                        <option>Heim</option>
+                        <option>Auswärts</option>
+                      </select>
+                    </label>
+                    <label>
+                      Wettbewerb
+                      <select id="calendarMatchCompetition">
+                        <option>Liga</option>
+                        <option>Pokal</option>
+                        <option>Freundschaftsspiel</option>
+                        <option>Interner Test</option>
+                      </select>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="calendar-type-fields calendar-event-fields">
+                  <label>
+                    Eventart
+                    <select id="calendarEventType"></select>
+                  </label>
+                </div>
+
+                <label>
+                  Notiz
+                  <textarea id="calendarNote" rows="4" placeholder="Wichtige Details, Treffpunkt, Material, Hinweise"></textarea>
+                </label>
+                <button class="primary-button" type="submit">Termin speichern</button>
+              </form>
+            </section>
+          </div>
+
+          <section class="panel" id="calendarListPane">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">Listenansicht</span>
+                <h2 id="calendarListTitle">Anstehende Termine</h2>
+              </div>
+            </div>
+            <div class="calendar-list" id="calendarList"></div>
+          </section>
+        </section>
+
+        <section class="view" id="trainingView" data-title="Training">
+          <div class="management-layout training-layout">
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Trainingsplan</span>
+                  <h2 id="trainingFormTitle">Training anlegen</h2>
+                </div>
+              </div>
+              <form id="trainingForm" class="stack-form">
+                <label>
+                  Datum
+                  <input id="trainingDate" required type="date" />
+                </label>
+                <div class="score-row">
+                  <label>
+                    Beginn
+                    <input id="trainingStartTime" type="time" />
+                  </label>
+                  <label>
+                    Ende
+                    <input id="trainingEndTime" type="time" />
+                  </label>
+                </div>
+                <label>
+                  Treffzeit
+                  <input id="trainingMeetTime" type="time" />
+                </label>
+                <label>
+                  Ort
+                  <input id="trainingLocation" type="text" placeholder="z. B. Hauptplatz, Kunstrasen, Halle" />
+                </label>
+                <label>
+                  Trainingsart
+                  <select id="trainingType"></select>
+                </label>
+                <div class="score-row">
+                  <label>
+                    Priorität
+                    <select id="trainingPriority"></select>
+                  </label>
+                  <label>
+                    Intensität
+                    <select id="trainingIntensity"></select>
+                  </label>
+                </div>
+                <label>
+                  Schwerpunkt
+                  <input id="trainingTopic" type="text" placeholder="z. B. Gegenpressing, Standards, letzter Pass" />
+                </label>
+                <label>
+                  Trainer-Notiz
+                  <textarea id="trainingCoachNote" rows="4" placeholder="Belastungssteuerung, Ziele, wichtige Hinweise"></textarea>
+                </label>
+                <div class="form-actions">
+                  <button class="primary-button" id="trainingSubmitButton" type="submit">Training speichern</button>
+                  <button class="ghost-button is-hidden" id="cancelTrainingEdit" type="button">Abbrechen</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="panel panel-large">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Trainings</span>
+                  <h2>Alle Einheiten</h2>
+                </div>
+              </div>
+              <div class="filter-bar training-filter-bar">
+                <label>
+                  Trainingsart
+                  <select id="trainingTypeFilter"></select>
+                </label>
+                <label>
+                  Priorität
+                  <select id="trainingPriorityFilter"></select>
+                </label>
+                <label>
+                  Intensität
+                  <select id="trainingIntensityFilter"></select>
+                </label>
+              </div>
+              <div class="training-goal-board" id="trainingPlayerGoals"></div>
+              <div class="training-list" id="trainingList"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="trainingStatsView" data-title="Trainingsstatistik">
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">Filter</span>
+                <h2>Saisontraining auswerten</h2>
+              </div>
+            </div>
+            <div class="filter-bar training-filter-bar">
+              <label>
+                Trainingsart
+                <select id="trainingStatsTypeFilter"></select>
+              </label>
+              <label>
+                Priorität
+                <select id="trainingStatsPriorityFilter"></select>
+              </label>
+              <label>
+                Intensität
+                <select id="trainingStatsIntensityFilter"></select>
+              </label>
+            </div>
+          </section>
+
+          <div class="metric-grid" id="trainingStatsMetrics"></div>
+
+          <div class="dashboard-grid">
+            <section class="panel panel-large">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Teilnahme</span>
+                  <h2>Trainingsverlauf</h2>
+                </div>
+              </div>
+              <div class="chart-box" id="trainingAttendanceChart"></div>
+            </section>
+
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Absagen</span>
+                  <h2>Häufigste Gründe</h2>
+                </div>
+              </div>
+              <div class="leaderboard-list" id="trainingAbsenceReasons"></div>
+            </section>
+          </div>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">Einzelspieler</span>
+                <h2>Trainingsstatistik</h2>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead>
+                  <tr>
+                    <th>Spieler</th>
+                    <th>Trainings</th>
+                    <th>Zusagen</th>
+                    <th>Absagen</th>
+                    <th>Verletzt</th>
+                    <th>Unent.</th>
+                    <th>Unent. %</th>
+                    <th>Teilnahme</th>
+                    <th>Ø Bewertung</th>
+                    <th>Letzter Status</th>
+                  </tr>
+                </thead>
+                <tbody id="trainingStatsTable"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="leaderboardView" data-title="Bestenliste">
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">Leistungsranking</span>
+                <h2>Bestenliste</h2>
+              </div>
+              <button class="ghost-button" id="rankingBasisToggle" type="button">Berechnung anzeigen</button>
+            </div>
+            <div class="view-tabs ranking-tabs" aria-label="Bestenlisten">
+              <button class="view-tab is-active" data-ranking-tab="overall" type="button">Bestenliste</button>
+              <button class="view-tab" data-ranking-tab="match" type="button">Spielbestenliste</button>
+              <button class="view-tab" data-ranking-tab="training" type="button">Trainingsbestenliste</button>
+            </div>
+            <div class="ranking-basis is-hidden" id="rankingBasisPanel"></div>
+          </section>
+
+          <div class="metric-grid" id="rankingSummaryMetrics"></div>
+
+          <section class="panel">
+            <div class="panel-heading">
+              <div>
+                <span class="eyebrow">Rangliste</span>
+                <h2 id="rankingTableTitle">Gesamtwertung</h2>
+              </div>
+            </div>
+            <div class="table-wrap">
+              <table class="ranking-table">
+                <thead>
+                  <tr>
+                    <th>Rang</th>
+                    <th>Spieler</th>
+                    <th>Punkte</th>
+                    <th>Spiel</th>
+                    <th>Training</th>
+                    <th>Unentschuldigt</th>
+                    <th>Profil</th>
+                  </tr>
+                </thead>
+                <tbody id="rankingTable"></tbody>
+              </table>
+            </div>
+          </section>
+        </section>
+
+        <section class="view" id="injuriesView" data-title="Verletzungen">
+          <div class="management-layout">
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Medizin</span>
+                  <h2 id="injuryFormTitle">Verletzung erfassen</h2>
+                </div>
+              </div>
+              <form id="injuryForm" class="stack-form">
+                <label>
+                  Spieler
+                  <select id="injuryPlayer"></select>
+                </label>
+                <div class="form-grid two">
+                  <label>
+                    Verletzungsart
+                    <select id="injuryType"></select>
+                  </label>
+                  <label>
+                    Bereich
+                    <select id="injuryBodyArea"></select>
+                  </label>
+                  <label>
+                    Schweregrad
+                    <select id="injurySeverity"></select>
+                  </label>
+                  <label>
+                    Status
+                    <select id="injuryStatus"></select>
+                  </label>
+                  <label>
+                    Von
+                    <input id="injuryStartDate" type="date" />
+                  </label>
+                  <label>
+                    Bis / geplant
+                    <input id="injuryEndDate" type="date" />
+                  </label>
+                </div>
+                <label>
+                  Arbeitsdiagnose / Diagnose
+                  <textarea id="injuryDiagnosis" rows="3" placeholder="z. B. leichte Oberschenkelzerrung, Sprunggelenksdistorsion, Belastungsreaktion"></textarea>
+                </label>
+                <label>
+                  Einschätzung Mannschaftsarzt
+                  <textarea id="injuryDoctorAssessment" rows="3" placeholder="Medizinische Einordnung, Warnzeichen, Freigabe-Bedingungen"></textarea>
+                </label>
+                <label>
+                  Einschätzung Physiotherapeut
+                  <textarea id="injuryPhysioAssessment" rows="3" placeholder="Reha-Fokus, Mobilität, Stabilität, Belastungsaufbau"></textarea>
+                </label>
+                <label>
+                  Reha-Maßnahmen
+                  <textarea id="injuryRehabPlan" rows="3" placeholder="z. B. Mobilität, isometrische Kraft, Lauf-ABC, stufenweiser Wiedereinstieg"></textarea>
+                </label>
+                <div class="form-grid two">
+                  <label>
+                    Trainingsbelastung
+                    <select id="injuryTrainingLoad"></select>
+                  </label>
+                  <label>
+                    Wiedereinstieg / Einsatz
+                    <input id="injuryReturnGuidance" type="text" placeholder="z. B. 20-30 Minuten, keine Maximalsprints" />
+                  </label>
+                </div>
+                <label>
+                  Trainer-Notiz
+                  <textarea id="injuryNote" rows="3" placeholder="Kommunikation, Schmerzreaktion, nächster Check"></textarea>
+                </label>
+                <p class="form-hint">Trainerhilfe: Die Einschätzung ersetzt keine medizinische Untersuchung oder Freigabe.</p>
+                <div class="form-actions">
+                  <button class="primary-button" id="injurySubmitButton" type="submit">Verletzung speichern</button>
+                  <button class="ghost-button is-hidden" id="cancelInjuryEdit" type="button">Abbrechen</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="panel panel-large">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Kadergesundheit</span>
+                  <h2>Verletzungsübersicht</h2>
+                </div>
+              </div>
+              <div class="filter-bar injury-filter-bar">
+                <label>
+                  Spieler
+                  <select id="injuryPlayerFilter"></select>
+                </label>
+                <label>
+                  Status
+                  <select id="injuryStatusFilter"></select>
+                </label>
+              </div>
+              <div class="metric-grid compact-metrics" id="injurySummaryMetrics"></div>
+              <div class="injury-list" id="injuryList"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="availabilityView" data-title="Verfügbarkeiten">
+          <div class="management-layout">
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Abwesenheiten</span>
+                  <h2 id="availabilityFormTitle">Verfügbarkeit eintragen</h2>
+                </div>
+              </div>
+              <form id="availabilityForm" class="stack-form">
+                <label>
+                  Spieler
+                  <select id="availabilityPlayer"></select>
+                </label>
+                <div class="form-grid two">
+                  <label>
+                    Status
+                    <select id="availabilityStatus"></select>
+                  </label>
+                  <label>
+                    Grund
+                    <select id="availabilityReason"></select>
+                  </label>
+                  <label>
+                    Von
+                    <input id="availabilityStartDate" type="date" />
+                  </label>
+                  <label>
+                    Bis
+                    <input id="availabilityEndDate" type="date" />
+                  </label>
+                  <label>
+                    Wiederholung
+                    <select id="availabilityWeekday"></select>
+                  </label>
+                </div>
+                <label>
+                  Notiz
+                  <textarea id="availabilityNote" rows="3" placeholder="z. B. kann mittwochs nicht, Reha-Fenster, Urlaub, Schule/Ausbildung"></textarea>
+                </label>
+                <div class="form-actions">
+                  <button class="primary-button" id="availabilitySubmitButton" type="submit">Verfügbarkeit speichern</button>
+                  <button class="ghost-button is-hidden" id="cancelAvailabilityEdit" type="button">Abbrechen</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="panel panel-large">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Kaderplanung</span>
+                  <h2>Alle Spieler</h2>
+                </div>
+                <button class="ghost-button" data-jump="calendar" type="button">Kalender anzeigen</button>
+              </div>
+              <div class="filter-bar availability-filter-bar">
+                <label>
+                  Spieler
+                  <select id="availabilityPlayerFilter"></select>
+                </label>
+                <label>
+                  Status
+                  <select id="availabilityStatusFilter"></select>
+                </label>
+              </div>
+              <div class="metric-grid compact-metrics" id="availabilitySummaryMetrics"></div>
+              <div class="availability-player-list" id="availabilityPlayerList"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="playersView" data-title="Spieler">
+          <div class="management-layout">
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Kader</span>
+                  <h2 id="playerFormTitle">Spieler anlegen</h2>
+                </div>
+              </div>
+              <form id="playerForm" class="stack-form">
+                <div class="photo-field">
+                  <label for="playerPhoto">Spielerbild</label>
+                  <div class="photo-upload">
+                    <div class="photo-preview" id="playerPhotoPreview" aria-hidden="true">
+                      <span>Bild</span>
+                    </div>
+                    <div>
+                      <input id="playerPhoto" accept="image/*" type="file" />
+                      <p>Optionales Profilbild für die Kaderkarte.</p>
+                      <button class="ghost-button small-button is-hidden" id="removePlayerPhoto" type="button">Bild entfernen</button>
+                    </div>
+                  </div>
+                </div>
+                <label>
+                  Name
+                  <input id="playerName" required type="text" placeholder="Vorname Nachname" />
+                </label>
+                <label>
+                  Hauptposition
+                  <select id="playerPosition"></select>
+                </label>
+                <div class="position-field">
+                  <span>Weitere Positionen</span>
+                  <div class="position-options" id="playerSecondaryPositions"></div>
+                </div>
+                <label>
+                  Rückennummer
+                  <input id="playerNumber" min="1" max="99" required type="number" />
+                </label>
+                <div class="stat-grid">
+                  <label>
+                    Jahrgang
+                    <input id="playerBirthYear" min="1990" max="2020" type="number" placeholder="z. B. 2008" />
+                  </label>
+                  <label>
+                    Größe
+                    <input id="playerHeight" min="120" max="230" type="number" placeholder="cm" />
+                  </label>
+                  <label>
+                    Starker Fuß
+                    <select id="playerFoot">
+                      <option>Rechts</option>
+                      <option>Links</option>
+                      <option>Beidfüßig</option>
+                    </select>
+                  </label>
+                  <label>
+                    Rolle im Ballbesitz
+                    <select id="playerRoleInPossession"></select>
+                  </label>
+                  <label>
+                    Rolle gegen den Ball
+                    <select id="playerRoleOutOfPossession"></select>
+                  </label>
+                </div>
+                <label>
+                  Profilnotiz
+                  <textarea id="playerProfileNote" rows="4" placeholder="z. B. mutig im Andribbeln, gutes Timing im Pressing, linker Fuß unter Druck verbessern"></textarea>
+                </label>
+                <label>
+                  Individuelles Trainingsziel
+                  <textarea id="playerTrainingGoal" rows="3" placeholder="z. B. erster Kontakt unter Druck, Schulterblick vor der Annahme, Flankenqualität verbessern"></textarea>
+                </label>
+                <div class="form-actions">
+                  <button class="primary-button" id="playerSubmitButton" type="submit">Spieler speichern</button>
+                  <button class="ghost-button is-hidden" id="cancelPlayerEdit" type="button">Abbrechen</button>
+                </div>
+              </form>
+            </section>
+
+            <section class="panel panel-large">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Saisonwerte</span>
+                  <h2>Kaderübersicht</h2>
+                </div>
+              </div>
+              <div class="player-roster-toolbar">
+                <label>
+                  Suche
+                  <input id="playerSearchFilter" type="search" placeholder="Name, Nummer, Rolle" />
+                </label>
+                <label>
+                  Hauptposition
+                  <select id="playerPositionFilter" aria-label="Spieler nach Hauptposition filtern"></select>
+                </label>
+                <label>
+                  Starker Fuß
+                  <select id="playerFootFilter">
+                    <option value="all">Alle Füße</option>
+                    <option value="Rechts">Rechts</option>
+                    <option value="Links">Links</option>
+                    <option value="Beidfüßig">Beidfüßig</option>
+                    <option value="open">Nicht gepflegt</option>
+                  </select>
+                </label>
+                <label>
+                  Analyse
+                  <select id="playerStatsFilter">
+                    <option value="all">Alle Spieler</option>
+                    <option value="withStats">Mit Spielwerten</option>
+                    <option value="withoutStats">Ohne Spielwerte</option>
+                    <option value="topIndex">Topform Index ≥ 80</option>
+                  </select>
+                </label>
+                <label>
+                  Sortierung
+                  <select id="playerSortSelect">
+                    <option value="number">Rückennummer</option>
+                    <option value="name">Name</option>
+                    <option value="index">Index</option>
+                    <option value="games">Spiele</option>
+                    <option value="passAccuracy">Passquote</option>
+                  </select>
+                </label>
+                <div class="view-tabs roster-view-tabs" aria-label="Kaderansicht">
+                  <button class="view-tab" data-player-view="cards" type="button">Kacheln</button>
+                  <button class="view-tab" data-player-view="list" type="button">Liste</button>
+                </div>
+              </div>
+              <div class="roster-grid" id="rosterGrid"></div>
+            </section>
+          </div>
+        </section>
+
+        <section class="view" id="matchesView" data-title="Spiele">
+          <div class="management-layout">
+            <section class="panel">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Spielplan</span>
+                  <h2>Spiel anlegen</h2>
+                </div>
+              </div>
+              <form id="matchForm" class="stack-form">
+                <label>
+                  Datum
+                  <input id="matchDate" required type="date" />
+                </label>
+                <label>
+                  Gegner
+                  <input id="matchOpponent" required type="text" placeholder="z. B. SV Nord" />
+                </label>
+                <label>
+                  Ort
+                  <select id="matchVenue">
+                    <option>Heim</option>
+                    <option>Auswärts</option>
+                  </select>
+                </label>
+                <label>
+                  Wettbewerb
+                  <select id="matchCompetition">
+                    <option>Liga</option>
+                    <option>Pokal</option>
+                    <option>Freundschaftsspiel</option>
+                    <option>Interner Test</option>
+                  </select>
+                </label>
+                <div class="score-row">
+                  <label>
+                    Eigene Tore
+                    <input id="matchGoalsFor" min="0" type="number" />
+                  </label>
+                  <label>
+                    Gegner Tore
+                    <input id="matchGoalsAgainst" min="0" type="number" />
+                  </label>
+                </div>
+                <div class="team-detail-grid">
+                  <label>
+                    xG ohne Elfmeter
+                    <input id="matchNonPenaltyXg" min="0" step="0.1" type="number" placeholder="z. B. 1,7" />
+                  </label>
+                  <label>
+                    xG Gegner
+                    <input id="matchOpponentXg" min="0" step="0.1" type="number" placeholder="z. B. 0,9" />
+                  </label>
+                  <label>
+                    Schüsse aufs Tor
+                    <input id="matchShotsOnTarget" min="0" type="number" />
+                  </label>
+                  <label>
+                    Erlittene Fouls
+                    <input id="matchFoulsWon" min="0" type="number" />
+                  </label>
+                  <label>
+                    Begangene Fouls
+                    <input id="matchFoulsCommitted" min="0" type="number" />
+                  </label>
+                  <label>
+                    Gegnerpässe letztes Drittel
+                    <input id="matchOpponentFinalThirdPasses" min="0" type="number" />
+                  </label>
+                  <label>
+                    PPDA
+                    <input id="matchPpda" min="0" step="0.1" type="number" placeholder="z. B. 9,8" />
+                  </label>
+                  <label>
+                    Zweikampfquote %
+                    <input id="matchDuelQuote" max="100" min="0" step="0.1" type="number" />
+                  </label>
+                </div>
+                <button class="primary-button" type="submit">Spiel speichern</button>
+              </form>
+            </section>
+
+            <section class="panel panel-large">
+              <div class="panel-heading">
+                <div>
+                  <span class="eyebrow">Analysebasis</span>
+                  <h2>Alle Spiele</h2>
+                </div>
+              </div>
+              <div class="filter-bar">
+                <label>
+                  Ort
+                  <select id="matchVenueFilter">
+                    <option value="all">Alle Spiele</option>
+                    <option value="Heim">Heimspiele</option>
+                    <option value="Auswärts">Auswärtsspiele</option>
+                  </select>
+                </label>
+                <label>
+                  Wettbewerb
+                  <select id="matchCompetitionFilter">
+                    <option value="all">Alle Wettbewerbe</option>
+                    <option value="Liga">Liga</option>
+                    <option value="Pokal">Pokal</option>
+                    <option value="Freundschaftsspiel">Freundschaftsspiel</option>
+                    <option value="Interner Test">Interner Test</option>
+                  </select>
+                </label>
+              </div>
+              <div class="match-list" id="matchList"></div>
+            </section>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <div class="modal-backdrop" id="playerProfileModal" aria-hidden="true">
+      <section class="player-modal" role="dialog" aria-modal="true" aria-labelledby="playerProfileTitle">
+        <div class="modal-topbar">
+          <div>
+            <span class="eyebrow">Spielerprofil</span>
+            <h2 id="playerProfileTitle">Spielerbericht</h2>
+          </div>
+          <div class="modal-actions">
+            <button class="ghost-button" id="editProfilePlayer" type="button">Spieler bearbeiten</button>
+            <button class="ghost-button" id="downloadPlayerReport" type="button">PNG speichern</button>
+            <button class="ghost-button icon-button" id="closePlayerProfile" type="button" aria-label="Schließen">×</button>
+          </div>
+        </div>
+        <div id="playerProfileContent"></div>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="matchDetailModal" aria-hidden="true">
+      <section class="player-modal match-modal" role="dialog" aria-modal="true" aria-labelledby="matchDetailTitle">
+        <div class="modal-topbar">
+          <div>
+            <span class="eyebrow">Spielanalyse</span>
+            <h2 id="matchDetailTitle">Spielbericht</h2>
+          </div>
+          <button class="ghost-button icon-button" id="closeMatchDetail" type="button" aria-label="Schließen">×</button>
+        </div>
+        <div id="matchDetailContent"></div>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="trainingDetailModal" aria-hidden="true">
+      <section class="player-modal match-modal" role="dialog" aria-modal="true" aria-labelledby="trainingDetailTitle">
+        <div class="modal-topbar">
+          <div>
+            <span class="eyebrow">Training</span>
+            <h2 id="trainingDetailTitle">Trainingsbericht</h2>
+          </div>
+          <button class="ghost-button icon-button" id="closeTrainingDetail" type="button" aria-label="Schließen">×</button>
+        </div>
+        <div id="trainingDetailContent"></div>
+      </section>
+    </div>
+
+    <div class="modal-backdrop" id="deleteConfirmModal" aria-hidden="true">
+      <section class="confirm-modal" role="dialog" aria-modal="true" aria-labelledby="deleteConfirmTitle">
+        <div class="modal-topbar">
+          <div>
+            <span class="eyebrow">Löschen bestätigen</span>
+            <h2 id="deleteConfirmTitle">Wirklich löschen?</h2>
+          </div>
+          <button class="ghost-button icon-button" id="closeDeleteConfirm" type="button" aria-label="Schließen">×</button>
+        </div>
+        <div class="confirm-content">
+          <p id="deleteConfirmMessage"></p>
+          <div class="form-actions">
+            <button class="danger-button" id="confirmDeleteButton" type="button">Endgültig löschen</button>
+            <button class="ghost-button" id="cancelDeleteButton" type="button">Abbrechen</button>
+          </div>
+        </div>
+      </section>
+    </div>
+
+	<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="app.js" defer></script>
+  </body>
+</html>
