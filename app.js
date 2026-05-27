@@ -1,11 +1,3 @@
-const SUPABASE_URL = "DEINE_SUPABASE_URL";
-const SUPABASE_PUBLISHABLE_KEY = "DEIN_SUPABASE_PUBLISHABLE_KEY";
-
-const supabaseClient = window.supabase.createClient(
-  SUPABASE_URL,
-  SUPABASE_PUBLISHABLE_KEY
-);
-
 const storageKey = "matchlab-football-state-v1";
 const colors = ["#247a52", "#ba4a43", "#247983", "#b66d1f", "#6a5b95", "#8a6f37"];
 const venueTypes = ["Heim", "Auswärts"];
